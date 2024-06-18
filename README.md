@@ -27,8 +27,15 @@ npm install -g httpyac
 
 By default, plugin provides the following commands:
 
-- `:ExecYac` - Execute the request which matches the current line. Default keybinding is `<leader>yr`
-- `:ExecYacAll` - Execute all requests in the current file. Default keybinding is `<leader>ya`
+- `:YacExec` - Execute the request which matches the current line. Default keybinding is `<leader>yr`
+- `:YacExecAll` - Execute all requests in the current file. Default keybinding is `<leader>ya`
+
+Supports everything that HttpYac supports, including variables, environments, auth schemas, etc.\
+Additional arguments can be passed to the `httpyac` command for the flexibility, for example:
+
+```vim
+:YacExec --timeout 5000
+```
 
 **Important:** the buffer should be saved before executing the request.
 
