@@ -23,7 +23,7 @@ function! YacExec( wholeFile, ... )
 	
 	let l:bufname = 'httpYac response'
 	
-	" Only attempt to remove the buffer if it exists *and* is loaded"
+	" Only attempt to remove the buffer if it exists *and* is loaded
 	if bufexists(l:bufname) && buflisted(l:bufname)
 		execute 'bdelete ' . bufnr(l:bufname)
 	endif
@@ -35,12 +35,8 @@ function! YacExec( wholeFile, ... )
 	" Automatically set the cursor to the first line
 	normal gg
 	
-	if bufexists(l:bufname) && buflisted(l:bufname)
-		execute 'file' l:bufname
-	else
-		execute 'file' "httpYac\ response"
-	endif
-	" finally, set http file type
+	execute 'file' l:bufname
+
 	set filetype=http
 endfunction
 
