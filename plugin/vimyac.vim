@@ -1,43 +1,50 @@
-function! YacExec( wholeFile, ... )
+function! YacExec(wholeFile, ...)
 	let l:line = line('.')
 	let l:file = expand('%')
-	
-	if a:wholeFile
-		let l:cmd = 'httpyac ' . l:file . ' -a'
-	else
-		let l:cmd = 'httpyac ' . l:file . ' -l ' . l:line
-	endif
+	let l:dir = fnamemodify(l:file, ':p:h')
+	let l:tmpfile = l:dir . '/.tmp_yac_request~'
 
-	" Add custom arguments
-	if a:0 > 0
-		let l:cmd = l:cmd . ' ' . a:1
-	endif
-	
-	let l:output = system(l:cmd)
+	call writefile(getline(1, '$'), l:tmpfile)
 
-	rightbelow vnew
-	setlocal buftype=nofile
-	setlocal bufhidden=hide
-	setlocal noswapfile
-	call setline(1, split(l:output, '\n'))
-	
-	let l:bufname = 'httpYac response'
-	
-	" Only attempt to remove the buffer if it exists *and* is loaded
-	if bufexists(l:bufname) && buflisted(l:bufname)
-		execute 'bdelete ' . bufnr(l:bufname)
-	endif
-	
-	" Set the buffer to not modifiable and readonly
-	setlocal nomodifiable
-	setlocal readonly
-	
-	" Automatically set the cursor to the first line
-	normal gg
-	
-	execute 'file' l:bufname
+	try
+		if a:wholeFile
+			let l:cmd = 'httpyac ' . l:tmpfile . ' -a'
+		else
+			let l:cmd = 'httpyac ' . l:tmpfile . ' -l ' . l:line
+		endif
 
-	set filetype=http
+		" Add custom arguments
+		if a:0 > 0
+			let l:cmd = l:cmd . ' ' . a:1
+		endif
+
+		let l:output = system(l:cmd)
+
+		rightbelow vnew
+		setlocal buftype=nofile
+		setlocal bufhidden=hide
+		setlocal noswapfile
+		call setline(1, split(l:output, '\n'))
+
+		let l:bufname = 'httpYac response'
+
+		if bufexists(l:bufname) && buflisted(l:bufname)
+			execute 'bdelete ' . bufnr(l:bufname)
+		endif
+
+		setlocal nomodifiable
+		setlocal readonly
+
+		normal gg
+
+		execute 'file' l:bufname
+
+		set filetype=http
+	finally
+		if filereadable(l:tmpfile)
+			call delete(l:tmpfile)
+		endif
+	endtry
 endfunction
 
 " Add a command to execute yac including potential custom arguments

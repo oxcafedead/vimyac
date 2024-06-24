@@ -45,6 +45,9 @@ You can get familiar with all the rich features of the awesome HttpYac tool by v
 
 ### Limitations
 
-- The buffer has to be saved before executing the request
-- The vim current directory should match the directory of the http file
 - Plugin is a wrapper for the CLI, so it doesn't provide any additional features like syntax highlighting, etc.
+- No dynamic environments selection, you need to specify the environment as an argument in the `:Yac*` commands. However, you can create own commands/mappings for different environments. For example:
+    ```vim
+    nnoremap <leader>yrl :YacExec --env local<CR>
+    ```
+- It was written in a hurry, so there might be some bugs. Also, I am a noob in Vimscript.
