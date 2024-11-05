@@ -1,0 +1,83 @@
+*vimyac.txt* A tiny plugin-wrapper over the HttpYac CLI for vim/neovim
+
+Author:		Artem Vozhdayenko <a.vozhdaenko@gmail.com>
+Repo:		https://github.com/oxcafedead/vimyac
+License:	MIT
+
+================================================================================
+CONTENTS                                                       *vimyac-contents*
+
+1. Introduction............................................|vimyac-introduction|
+    1.1. Requirements......................................|vimyac-requirements|
+    1.2 Usage.....................................................|vimyac-usage|
+        1.2.1. Limitations..................................|vimyac-limitations|
+
+================================================================================
+INTRODUCTION                                               *vimyac-introduction*
+
+This tiny plugin just wraps the HttpYac (https://httpyac.github.io) CLI to
+quickly execute HTTP requests from vim.
+Similar to REST Client for VSCode:
+  https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+or HTTP Client for IntelliJ IDEA:
+  https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html
+
+--------------------------------------------------------------------------------
+REQUIREMENTS                                               *vimyac-requirements*
+
+Please note: as the plugin is just a wrapper for the HttpYac CLI, you need to
+have the latter installed on your system.
+
+You can install it in various ways, the only requirement is that the `httpyac`
+command should be available in your `PATH`.
+For example, you can install it using `npm`:
+
+>
+    npm install -g httpyac
+<
+
+--------------------------------------------------------------------------------
+USAGE                                           *vimyac-commands* *vimyac-usage*
+
+By default, plugin provides the following commands:
+
+                                                                       *YacExec*
+:YacExec [arguments]         Execute the request which matches the current line.
+                             The default keybinding is `<leader>yr`.
+			     For arguments, see below.
+			                                            *YacExecAll*
+:YacExecAll [arguments]      Execute all requests in the current file.
+                             The default keybinding is `<leader>ya`.
+			     For arguments, see below.
+
+Supports everything that HttpYac supports, including variables, environments,
+auth schemas, etc.
+
+Additional arguments can be passed to the `httpyac` command for the flexibility,
+for example:
+
+>
+    :YacExec --timeout 5000
+<
+
+You can get familiar with all the rich features of the awesome HttpYac tool by
+visiting the official documentation (https://httpyac.github.io).
+
+--------------------------------------------------------------------------------
+LIMITATIONS                                                 *vimyac-limitations*
+
+Plugin is a wrapper for the CLI, so it doesn't provide any additional features
+like syntax highlighting, etc. You can install HTTP syntax highlighting for your
+convenience.
+
+No dynamic environments selection, you need to specify the environment as an
+argument in the |vimyac-usage| commands.
+
+However, you can create own commands/mappings for different environments. For
+example:
+>
+        nnoremap <leader>yrl :YacExec --env local<CR>
+<
+
+It was written in a hurry, so there might be some bugs.
+Also, I am a noob in Vimscript.
