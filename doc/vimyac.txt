@@ -1,4 +1,4 @@
-*vimyac.txt* A tiny plugin-wrapper over the HttpYac CLI for vim/neovim
+*vimyac.txt*  A tiny plugin-wrapper over the HttpYac CLI for vim/neovim
 
 Author:		Artem Vozhdayenko <a.vozhdaenko@gmail.com>
 Repo:		https://github.com/oxcafedead/vimyac
@@ -9,7 +9,7 @@ CONTENTS                                                       *vimyac-contents*
 
 1. Introduction............................................|vimyac-introduction|
     1.1. Requirements......................................|vimyac-requirements|
-    1.2 Usage.....................................................|vimyac-usage|
+    1.2. Usage....................................................|vimyac-usage|
         1.2.1. Limitations..................................|vimyac-limitations|
 
 ================================================================================
@@ -59,6 +59,8 @@ for example:
 >
     :YacExec --timeout 5000
 <
+
+The plugin support arguments autocompletion.
 
 You can get familiar with all the rich features of the awesome HttpYac tool by
 visiting the official documentation (https://httpyac.github.io).

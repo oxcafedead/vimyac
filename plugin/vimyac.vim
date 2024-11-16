@@ -1,3 +1,5 @@
+let g:yac_exec_args = []
+
 function! YacExec(wholeFile, ...)
 	let l:line = line('.')
 	let l:file = expand('%')
@@ -14,8 +16,8 @@ function! YacExec(wholeFile, ...)
 		endif
 
 		" Add custom arguments
-		if a:0 > 0
-			let l:cmd = l:cmd . ' ' . a:1
+		if !empty(a:000)
+			let l:cmd = l:cmd . ' ' . join(a:000)
 		endif
 
 		let l:output = system(l:cmd)
@@ -47,9 +49,37 @@ function! YacExec(wholeFile, ...)
 	endtry
 endfunction
 
-" Add a command to execute yac including potential custom arguments
-command! -nargs=* YacExec call YacExec(0, <q-args>)
-command! -nargs=* YacExecAll call YacExec(1, <q-args>)
+function! YacExecArgs(A, L, P)
+	if empty(g:yac_exec_args)
+		" only send options since plugin essentially only runs send
+		" command
+		let l:help_output = system('httpyac send --help')
+		let l:lines = split(l:help_output, '\n')
+		let g:yac_exec_args = []
+		for l:line in l:lines
+			let l:parts = split(l:line)
+			for l:part in l:parts
+				if l:part =~ '^-'
+					" trim commas and equal signs
+					let l:part = substitute(l:part, '[=,]', '', 'g')
+					call add(g:yac_exec_args, l:part)
+				endif
+			endfor
+		endfor
+	endif
+	" now, only return matching options
+	let l:matches = []
+	for l:arg in g:yac_exec_args
+		if l:arg =~ a:A
+			call add(l:matches, l:arg)
+		endif
+	endfor
+	return l:matches
+endfunction
+
+command! -nargs=* -complete=customlist,YacExecArgs YacExec call YacExec(0, <f-args>)
+command! -nargs=* -complete=customlist,YacExecArgs YacExecAll call YacExec(1, <f-args>)
+
 
 " Default key bindings
 nnoremap <leader>yr :YacExec<CR>
