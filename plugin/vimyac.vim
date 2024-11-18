@@ -61,7 +61,13 @@ function! YacEnvCandidates()
 			endif
 		endfor
 	endfor
-	return l:env_names
+	let l:normalized = []
+	for l:env_name in l:env_names
+		if index(l:normalized, l:env_name) == -1
+			call add(l:normalized, l:env_name)
+		endif
+	endfor
+	return sort(l:normalized)
 endfunction
 
 function! YacChooseEnv()
