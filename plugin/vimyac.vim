@@ -39,41 +39,53 @@ function! YacEnvCandidates()
 	if !empty($HTTPYAC_ENV)
 		call add(l:candidates, $HTTPYAC_ENV)
 	endif
-	let l:env_files = []
+	let l:env_names = []
 	for l:candidate in l:candidates
 		let l:files = systemlist('find ' . candidate . ' -maxdepth 1 -name "*.env*"')
 		for l:file in l:files
-			if l:file =~ '.*\.env\(\..*\)\?$'
-				call add(l:env_files, l:file)
+			let l:file = fnamemodify(l:file, ':t')
+			if l:file =~ '^\.env$'
+				call add(l:env_names, '')
+			elseif l:file =~ '\.env\..*'
+				" env name is myenv if file name is .env.myenv
+				let l:env_name = substitute(l:file, '.env.', '', '')
+				call add(l:env_names, l:env_name)
+			elseif l:file =~ '.*\.env$'
+				" env name is myenv if file name is myenv.env
+				let l:env_name = substitute(l:file, '.env$', '', '')
+				call add(l:env_names, l:env_name)
 			endif
 		endfor
 	endfor
-	return l:env_files
+	return l:env_names
 endfunction
 
 function! YacChooseEnv()
-	let l:env_files = YacEnvCandidates()
-	if empty(l:env_files)
+	let l:env_names = YacEnvCandidates()
+	if empty(l:env_names)
 		return ''
 	endif
-	if len(l:env_files) == 1
-		call YacSetProjectEnv(l:env_files[0])
-		return l:env_files[0]
+	if len(l:env_names) == 1
+		call YacSetProjectEnv(l:env_names[0])
+		return l:env_names[0]
 	endif
+	let l:options = []
 	let l:labels = []
 	let l:option_number = 1
-	for l:env_file in l:env_files
-		let l:only_file_name = fnamemodify(l:env_file, ':t')
-		call add(l:labels, l:option_number . '. ' . l:only_file_name)
-		let l:option_number = l:option_number + 1
+	for l:env_name in l:env_names
+		if !empty(l:env_name)
+			call add(l:options, l:env_name)
+			call add(l:labels, l:option_number . '. ' . l:env_name)
+			let l:option_number = l:option_number + 1
+		endif
 	endfor
-	let l:ret = inputlist(['Select env file:'] + l:labels)
+	let l:ret = inputlist(['Select environment:'] + l:labels)
 	if l:ret == -1
 		return ''
 	endif
-	let l:env_file = l:env_files[l:ret - 1]
-	call YacSetProjectEnv(l:env_file)
-	return l:env_file
+	let l:env_name = l:options[l:ret - 1]
+	call YacSetProjectEnv(l:env_name)
+	return l:env_name
 endfunction
 
 " The function parses raw output and creates list of outputs with no extra
@@ -112,6 +124,7 @@ function! YacExec(wholeFile, ...)
 
 	let l:line = line('.')
 	let l:file = expand('%')
+	let l:cwd = getcwd()
 	let l:dir = fnamemodify(l:file, ':p:h')
 	let l:tmpfile = l:dir . '/.tmp_yac_request~'
 
@@ -126,12 +139,8 @@ function! YacExec(wholeFile, ...)
 		let l:project_root = YacProjectRoot()
 		let l:existing_env = YacGetProjectEnv()
 		if empty(l:existing_env)
-			let l:env_file = YacChooseEnv()
-			if !empty(l:env_file)
-				" httpyac only understands env name itself
-				" (with no extension) not the full path
-				" so we need to extract it
-				let l:env_name = fnamemodify(l:env_file, ':t:r')
+			let l:env_name = YacChooseEnv()
+			if !empty(l:env_name)
 				let l:cmd = l:cmd . ' -e ' . l:env_name
 			endif
 		endif
@@ -140,6 +149,9 @@ function! YacExec(wholeFile, ...)
 			let l:cmd = l:cmd . ' ' . join(a:000)
 		endif
 
+		if !empty(l:project_root)
+			execute 'cd ' . l:project_root
+		endif
 		let l:output = YacNormalize(system(l:cmd))
 
 		rightbelow vnew
@@ -159,6 +171,7 @@ function! YacExec(wholeFile, ...)
 		execute 'file' l:bufname
 		set filetype=http
 	finally
+		execute 'cd ' . l:cwd
 		if filereadable(l:tmpfile)
 			call delete(l:tmpfile)
 		endif
