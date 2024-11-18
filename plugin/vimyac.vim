@@ -128,7 +128,11 @@ function! YacExec(wholeFile, ...)
 		if empty(l:existing_env)
 			let l:env_file = YacChooseEnv()
 			if !empty(l:env_file)
-				let l:cmd = l:cmd . ' -e ' . l:env_file
+				" httpyac only understands env name itself
+				" (with no extension) not the full path
+				" so we need to extract it
+				let l:env_name = fnamemodify(l:env_file, ':t:r')
+				let l:cmd = l:cmd . ' -e ' . l:env_name
 			endif
 		endif
 
