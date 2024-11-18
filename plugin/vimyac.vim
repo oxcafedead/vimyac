@@ -6,7 +6,11 @@ function! YacSetProjectEnv(env)
 	if empty(l:project_root)
 		let l:project_root = '_DEFAULT_'
 	endif
-	let g:yac_environments_per_project[l:project_root] = a:env
+	if empty(a:env)
+		let g:yac_environments_per_project[l:project_root] = '(default)'
+	else
+		let g:yac_environments_per_project[l:project_root] = a:env
+	endif
 endfunction
 
 function! YacGetProjectEnv()
@@ -69,21 +73,21 @@ function! YacChooseEnv()
 		call YacSetProjectEnv(l:env_names[0])
 		return l:env_names[0]
 	endif
-	let l:options = []
 	let l:labels = []
 	let l:option_number = 1
 	for l:env_name in l:env_names
-		if !empty(l:env_name)
-			call add(l:options, l:env_name)
+		if empty(l:env_name)
+			call add(l:labels, l:option_number . '. (default)')
+		else
 			call add(l:labels, l:option_number . '. ' . l:env_name)
-			let l:option_number = l:option_number + 1
 		endif
+		let l:option_number = l:option_number + 1
 	endfor
 	let l:ret = inputlist(['Select environment:'] + l:labels)
 	if l:ret == -1
 		return ''
 	endif
-	let l:env_name = l:options[l:ret - 1]
+	let l:env_name = l:env_names[l:ret - 1]
 	call YacSetProjectEnv(l:env_name)
 	return l:env_name
 endfunction
@@ -137,12 +141,12 @@ function! YacExec(wholeFile, ...)
 			let l:cmd = 'httpyac ' . l:tmpfile . ' -l ' . l:line
 		endif
 		let l:project_root = YacProjectRoot()
-		let l:existing_env = YacGetProjectEnv()
-		if empty(l:existing_env)
+		let l:env_name = YacGetProjectEnv()
+		if empty(l:env_name)
 			let l:env_name = YacChooseEnv()
-			if !empty(l:env_name)
-				let l:cmd = l:cmd . ' -e ' . l:env_name
-			endif
+		endif
+		if !empty(l:env_name) && l:env_name != '(default)'
+			let l:cmd = l:cmd . ' -e ' . l:env_name
 		endif
 
 		if !empty(a:000)
