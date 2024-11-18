@@ -53,6 +53,10 @@ By default, plugin provides the following commands:
 Supports everything that HttpYac supports, including variables, environments,
 auth schemas, etc.
 
+If any dotenv file is found which is suitable for `httpyac`, it will be loaded
+automatically. If several dotenv files are found, the user will be prompted to
+choose one. The environment will be remembered for the current session.
+
 Additional arguments can be passed to the `httpyac` command for the flexibility,
 for example:
 
@@ -72,13 +76,10 @@ Plugin is a wrapper for the CLI, so it doesn't provide any additional features
 like syntax highlighting, etc. You can install HTTP syntax highlighting for your
 convenience.
 
-No dynamic environments selection, you need to specify the environment as an
-argument in the |vimyac-usage| commands.
-
-However, you can create own commands/mappings for different environments. For
-example:
+However, you can create own commands/mappings for different environments or
+other commonly-reused `httpyac` CLI options. For example:
 >
-        nnoremap <leader>yrl :YacExec --env local<CR>
+        nnoremap <leader>yrl :YacExec --env local --timeout 1000<CR>
 <
 
 It was written in a hurry, so there might be some bugs.
