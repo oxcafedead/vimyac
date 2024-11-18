@@ -1,5 +1,33 @@
 let g:yac_exec_args = []
 
+" The function parses raw output and creates list of outputs with no extra
+" data to put into separate buffers with a proper HTTP syntax highlighting
+function! YacNormalize(content)
+	let l:split_seq = '---------------------'
+	let l:lines = split(a:content, '\n')
+	let l:normalized = ''
+	let l:current_request = ''
+	let l:new_line = '\n'
+	for l:line in l:lines
+		if l:line == l:split_seq
+			let l:normalized = l:normalized . l:current_request . l:new_line
+			let l:current_request = '###'.l:new_line
+		else
+			if l:line =~ '^=== .* ==='
+				" this is kind of request info, so we can
+				" insert it as ### Request info ###
+				" as a part of normalized output
+				let l:comment = substitute(l:line, '^=== \(.*\) ===', '\1', '')
+				let l:current_request = '### '. l:comment . ' ###' . l:new_line
+				continue
+			endif
+			let l:current_request = l:current_request . l:line . l:new_line
+		endif
+	endfor
+	let l:normalized = l:normalized . l:current_request
+	return l:normalized
+endfunction
+
 function! YacExec(wholeFile, ...)
 	let l:line = line('.')
 	let l:file = expand('%')
@@ -15,18 +43,18 @@ function! YacExec(wholeFile, ...)
 			let l:cmd = 'httpyac ' . l:tmpfile . ' -l ' . l:line
 		endif
 
-		" Add custom arguments
 		if !empty(a:000)
 			let l:cmd = l:cmd . ' ' . join(a:000)
 		endif
 
-		let l:output = system(l:cmd)
+		let l:output = YacNormalize(system(l:cmd))
 
 		rightbelow vnew
 		setlocal buftype=nofile
 		setlocal bufhidden=hide
 		setlocal noswapfile
-		call setline(1, split(l:output, '\n'))
+		let l:content_for_buf = split(l:output, '\\n')
+		call append(0, l:content_for_buf)
 
 		let l:bufname = 'httpYac response'
 
@@ -34,13 +62,8 @@ function! YacExec(wholeFile, ...)
 			execute 'bdelete ' . bufnr(l:bufname)
 		endif
 
-		setlocal nomodifiable
-		setlocal readonly
-
 		normal gg
-
 		execute 'file' l:bufname
-
 		set filetype=http
 	finally
 		if filereadable(l:tmpfile)
@@ -79,7 +102,6 @@ endfunction
 
 command! -nargs=* -complete=customlist,YacExecArgs YacExec call YacExec(0, <f-args>)
 command! -nargs=* -complete=customlist,YacExecArgs YacExecAll call YacExec(1, <f-args>)
-
 
 " Default key bindings
 nnoremap <leader>yr :YacExec<CR>
