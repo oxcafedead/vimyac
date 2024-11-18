@@ -29,6 +29,11 @@ function! YacNormalize(content)
 endfunction
 
 function! YacExec(wholeFile, ...)
+	if !executable('httpyac')
+		echoerr 'httpyac is not installed. Please install it first (see h: vimyac-requirements)'
+		return
+	endif
+
 	let l:line = line('.')
 	let l:file = expand('%')
 	let l:dir = fnamemodify(l:file, ':p:h')
