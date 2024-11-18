@@ -68,7 +68,7 @@ function! YacChooseEnv()
 		let l:option_number = l:option_number + 1
 	endfor
 	let l:ret = inputlist(['Select env file:'] + l:labels)
-	if l:ret == -1 || l:ret == 0
+	if l:ret == -1
 		return ''
 	endif
 	let l:env_file = l:env_files[l:ret - 1]
