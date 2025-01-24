@@ -49,6 +49,9 @@ By default, plugin provides the following commands:
 :YacExecAll [arguments]      Execute all requests in the current file.
                              The default keybinding is `<leader>ya`.
 			     For arguments, see below.
+:YacChooseEnv                Choose the environment from the dotenv files.
+                             Can be useful if another environment is needed for
+			     the current session.
 
 Supports everything that HttpYac supports, including variables, environments,
 auth schemas, etc.

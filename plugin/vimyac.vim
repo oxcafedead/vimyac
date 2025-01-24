@@ -218,6 +218,7 @@ endfunction
 
 command! -nargs=* -complete=customlist,YacExecArgs YacExec call YacExec(0, <f-args>)
 command! -nargs=* -complete=customlist,YacExecArgs YacExecAll call YacExec(1, <f-args>)
+command! YacChooseEnv call YacChooseEnv()
 
 " Default key bindings
 nnoremap <leader>yr :YacExec<CR>
